@@ -1,16 +1,16 @@
 from datetime import datetime
 import os
-import sys
+import argparse
 
 
-def create_file(file_path: str, content: list) -> None:
+def create_file(file_path: str, content: list[str]) -> None:
     with open(file_path, "a") as file:
         file.write(f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}\n')
         for i, line in enumerate(content, start=1):
             file.write(f"{i} {line}\n")
 
 
-def get_file_content() -> list:
+def get_file_content() -> list[str]:
     content = []
     while True:
         line = input("Enter content line: ")
@@ -22,22 +22,24 @@ def get_file_content() -> list:
 
 
 def main() -> None:
-    args = sys.argv[1:]
-    if "-d" in args:
-        dir_index = args.index("-d") + 1
-        directory_path = args[dir_index:]
-        if "-f" in directory_path:
-            file_index = directory_path.index("-f")
-            file_name = directory_path[file_index + 1]
-            directory_path = directory_path[:file_index]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d", "--directory", nargs="*")
+    parser.add_argument("-f", "--file")
+
+    args = parser.parse_args()
+
+    if args.directory:
+        directory_path = args.directory
+        if args.file:
+            file_name = args.file
             os.makedirs(os.path.join(*directory_path), exist_ok=True)
             file_path = os.path.join(*directory_path, file_name)
             content = get_file_content()
             create_file(file_path, content)
         else:
             os.makedirs(os.path.join(*directory_path), exist_ok=True)
-    elif "-f" in args:
-        file_name = args[args.index("-f") + 1]
+    elif args.file:
+        file_name = args.file
         content = get_file_content()
         create_file(file_name, content)
 
